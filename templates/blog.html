@@ -5,9 +5,9 @@
 
 <a href="/newpost">New Blog Entry</a>
 
-{% for entry in entries %}
-<h2>{{blog_title}}</h2>
-<p>{{blog_content}}</p>
+{% for blog in blog_entries %}
+<h2>{{blog.title}}</h2>
+<p>{{blog.body}}</p>
 {% endfor %}
 
 {% endblock %}

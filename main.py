@@ -24,20 +24,23 @@ def index():
     # individual parts of the blog entry. want to display
     # title and body in an html template but am not sure what
     # else to write out other than blog.query.all()
-    entries = Blog.query.all()
-    return render_template('blog.html', title = "Blog", entries = entries)
+    blog_entries = Blog.query.all()
+    return render_template('blog.html', title = "Blog", blog_entries = blog_entries)
 
 @app.route('/newpost', methods=['GET', 'POST'])
 def newpost():
+    entries = Blog.query.all()
     if request.method == 'POST':
         blog_title = request.form['blog_title']
         blog_content = request.form['blog_content']
-        new_entry = Blog(blog_title, blog_content)
-        db.session.add(new_entry)
+        new_blog = Blog(blog_title, blog_content)
+        db.session.add(new_blog)
         db.session.commit()
+        new_blog_id = new_blog.id
+        
         return redirect('/')
     
-    return render_template('new_post.html', title = "New Blog Entry")
+    return render_template('new_post.html', title = "New Blog Entry", entries = entries)
 
 if __name__ == "__main__":
     app.run()
