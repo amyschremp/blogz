@@ -18,11 +18,20 @@ class Blog(db.Model):
         self.title = title
         self.body = body
 
-
 @app.route('/')
 def index():
-    blog_entries = Blog.query.all()
-    return render_template('blog.html', title = "Build-A-Blog", blog_entries = blog_entries)
+    '''convenience route'''
+    return redirect('/blog')
+
+@app.route('/blog')
+def blog():
+    entry_id = request.args.get('id')
+    if entry_id:
+        blog = Blog.query.get(entry_id)
+        return render_template('individual_entry.html', blog = blog)
+    else:
+        blog_entries = Blog.query.order_by(Blog.id.desc()).all()
+        return render_template('blog.html', title = "Build-A-Blog", blog_entries = blog_entries)
 
 @app.route('/newpost', methods=['GET', 'POST'])
 def newpost():
