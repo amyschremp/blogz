@@ -29,10 +29,8 @@ def newpost():
     if request.method == 'POST':
         entry_title = request.form['blog_title']
         entry_body = request.form['blog_content']
-        if not entry_title:
-            flash('Please enter a title.')
-        if not entry_body:
-            flash('Please enter a body.')
+        if not entry_title or not entry_body:
+            flash('Please enter both a title and a body.')
         else:
             new_blog = Blog(entry_title, entry_body)
             db.session.add(new_blog)
