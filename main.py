@@ -40,6 +40,10 @@ def newpost():
         entry_body = request.form['blog_content']
         if not entry_title or not entry_body:
             flash('Please enter both a title and a body.')
+        elif len(entry_title) > 120:
+            flash('Please enter a title of 120 characters or less.')
+        elif len(entry_body) > 2000:
+            flash('Please enter a body of 2000 characters or less.')
         else:
             new_blog = Blog(entry_title, entry_body)
             db.session.add(new_blog)
