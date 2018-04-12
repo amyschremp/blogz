@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, session, flash
+from flask import Flask, request, redirect, render_template, session, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -17,6 +17,7 @@ class Blog(db.Model):
     def __init__(self, title, body):
         self.title = title
         self.body = body
+
 
 @app.route('/')
 def index():

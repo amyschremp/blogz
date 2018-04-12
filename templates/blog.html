@@ -1,19 +1,20 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h1 style='text-align:center;'>Build-A-Blog</h1>
-<br />
-<h2>Blog Entries</h2>
-<!-- TODO: add a sort dropdown -->
-<hr />
+<div class='header'>
+    <h1 style='text-align:center;'>Build-A-Blog</h1>
+    <br />
+    <h2 class='label'>Blog Entries</h2>
+</div>
 {% for blog in blog_entries %}
-<h3><a href='/blog?id={{blog.id}}'>{{blog.title}}</a></h3>
-<p>{{blog.body}}</p>
-<form action='/delete' method='post'>
-    <input type='hidden' name='id' value='{{blog.id}}' />
-    <input type='submit' value='Delete Entry' />
-</form>
-<hr />
+<div class='blog'>
+    <h3><a href='/blog?id={{blog.id}}'>{{blog.title}}</a></h3>
+    <p>{{blog.body}}</p>
+    <form action='/delete' method='post'>
+        <input type='hidden' name='id' value='{{blog.id}}' />
+        <input type='submit' value='Delete Entry' />
+    </form>
+</div>
 {% endfor %}
 
 {% endblock %}
