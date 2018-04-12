@@ -22,11 +22,18 @@
     color: white;
 }
 
+.label {
+    text-align: center;
+}
+
 .blog {
     border: 1px solid rgb(112, 112, 112);
     box-shadow: 5px 5px 10px rgb(112, 112, 112);
     padding: 10px;
     margin: 10px;
+    width: 50em;
+    margin: auto;
+    margin-bottom: 2em;
 }
 
 .header {
@@ -37,4 +44,17 @@
 
 div h3 a:visited {
     color: black;
+}
+
+.newpost {
+    border: 1px solid rgb(112, 112, 112);
+    box-shadow: 5px 5px 10px rgb(112, 112, 112);
+    padding: 10px;
+    margin: 10px;
+    width: 30em;
+    margin: auto;
+}
+
+#newpost {
+    height: 30em;
 }
