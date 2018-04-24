@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
 
+{% with messages = get_flashed_messages() %}
+    <ul>
+    {% for message in messages %} 
+        <li>{{message}}</li>
+    {% endfor %}
+    </ul>
+{% endwith %}
+
 <div class='header'>
     <h1 style='text-align:center;'>Build-A-Blog</h1>
     <br />

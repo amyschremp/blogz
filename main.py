@@ -15,20 +15,32 @@ class Blog(db.Model):
     body = db.Column(db.String(2000))
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(self, title, body):
+    def __init__(self, title, body, owner):
         self.title = title
         self.body = body
+        self.owner = owner
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    username = db.Column(db.String(30))
-    password = db.Column(db.String(30))
+    username = db.Column(db.String(120))
+    password = db.Column(db.String(120))
     blogs = db.relationship('Blog', backref='owner')
+
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+
+@app.before_request
+def require_login():
+    allowed_routes = ['login', 'signup']
+    if request.endpoint not in allowed_routes and 'username' not in session:
+        return redirect('/login')
 
 
 @app.route('/blog')
 def blog():
-    owner = User.query.filter_by(username=session['username']).first()
     entry_id = request.args.get('id')
     if entry_id:
         blog = Blog.query.get(entry_id)
@@ -37,6 +49,7 @@ def blog():
         blog_entries = Blog.query.order_by(Blog.id.desc()).all()
         return render_template('blog.html', title = "Blogz", blog_entries = blog_entries)
 
+
 @app.route('/delete', methods=['POST'])
 def delete():
     to_be_deleted = request.form['id']
@@ -44,10 +57,12 @@ def delete():
     db.session.commit()
     return redirect('/')
 
+
 @app.route('/')
 def index():
     '''convenience route'''
     return redirect('/blog')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -55,16 +70,26 @@ def login():
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
-        if user and user.password == password:
+        if not username or not password:
+            flash('Please enter a username and password.')
+        elif user and user.password == password:
             session['username'] = username
             return redirect('/')
         else:
             flash('User password incorrect, or user does not exist')
     return render_template('login.html', title='Login')
 
+
+@app.route('/logout')
+def logout():
+    del session['username']
+    return redirect('/')
+
+
 @app.route('/newpost', methods=['GET', 'POST'])
 def newpost():
     owner = User.query.filter_by(username=session['username']).first()
+
     if request.method == 'POST':
         entry_title = request.form['blog_title']
         entry_body = request.form['blog_content']
@@ -82,6 +107,32 @@ def newpost():
             return redirect('/')
     
     return render_template('new_post.html', title = "New Blog Entry")
+
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        verify = request.form['verify_password']
+        existing_user = User.query.filter_by(username=username).first()
+        if not existing_user:
+            if not username or not password or not verify:
+                flash('Please enter a username and password.')
+            elif not password == verify:
+                flash('Passwords do not match.')
+            elif len(username) > 30:
+                flash('Please enter a username of 30 characters or less.')
+            elif len(password) > 30:
+                flash('Please enter a password of 30 characters or less.')
+            else:
+                new_user = User(username, password)
+                db.session.add(new_user)
+                db.session.commit()
+                session['username'] = username
+                flash('Logged in')
+                return redirect('/blog')
+    return render_template('signup.html', title = "Sign Up for Blogz")
 
 
 if __name__ == "__main__":

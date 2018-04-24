@@ -62,3 +62,7 @@ div h3 a:visited {
 #newpost {
     height: 30em;
 }
+
+.flashes {
+    color: red;
+}

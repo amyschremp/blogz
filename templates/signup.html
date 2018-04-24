@@ -1,4 +1,37 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<h2>Sign Up</h2>
+
+<p>Already have an account? <a href='/login'>Login here</a>!</p>
+
+{% with messages = get_flashed_messages() %}
+    <ul class='flashes'>
+    {% for message in messages %} 
+        <li>{{message}}</li>
+    {% endfor %}
+    </ul>
+{% endwith %}
+
+<form action='/signup' method='POST'>
+    <table>
+        <tr>
+            <td><label for='username'>Username</label>
+            </td>
+            <td><input name='username' type='text' value='{{ username }}' /></td>
+        </tr>
+        <tr>
+            <td><label for='password'>Password</label>
+            </td>
+            <td><input name='password' type='password' /></td>
+        </tr>
+        <tr>
+            <td><label for='verify_password'>Verify Password</label>
+            </td>
+            <td><input name='verify_password' type='password' /></td>
+        </tr>
+    </table>
+    <input type='submit' value='Sign Up' />
+</form>
+
 {% endblock %}

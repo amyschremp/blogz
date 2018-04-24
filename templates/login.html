@@ -2,6 +2,16 @@
 {% block content %}
 <h2>Login</h2>
 
+{% with messages = get_flashed_messages() %}
+    <ul class='flashes'>
+    {% for message in messages %} 
+        <li>{{message}}</li>
+    {% endfor %}
+    </ul>
+{% endwith %}
+
+<p>Don't have an account? <a href='/signup'>Register here</a>!</p>
+
 <form action='/login' method='POST'>
     <table>
         <tr>
