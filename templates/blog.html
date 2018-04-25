@@ -9,11 +9,6 @@
     </ul>
 {% endwith %}
 
-<div class='header'>
-    <h1 style='text-align:center;'>Build-A-Blog</h1>
-    <br />
-    <h2 class='label'>Blog Entries</h2>
-</div>
 {% for blog in blog_entries %}
 <div class='blog'>
     <h3><a href='/blog?id={{blog.id}}'>{{blog.title}}</a></h3>
@@ -24,6 +19,7 @@
     </form>
 </div>
 {% endfor %}
+
 {% if not blog_entries %}
     <p style='text-align:center;'>{{ username }} has no posts yet! Click <a href='/newpost'>here</a> to add one.</p>
 {% endif %}

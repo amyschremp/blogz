@@ -15,8 +15,15 @@
             <a href='/login'>Login</a>
             {% endif %}
             {% if 'username' in session %}
-                <a href='/logout'>Logout</a>
+                <a href='/blog'>My Blogz</a>
+                <a style='float:right;'>Logged in as {{username}}</a>
+                <a style='float:right;' href='/logout'>Logout</a>
             {% endif %}
+        </div>
+        <div class='header'>
+            <h1 style='text-align:center;'>Blogz</h1>
+            <br />
+            <h2 class='label'>{{title}}</h2>
         </div>
         {% block content %}
         {% endblock %}

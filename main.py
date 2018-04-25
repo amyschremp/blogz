@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect, render_template, session, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['DEBUG']= True
@@ -14,11 +15,15 @@ class Blog(db.Model):
     title = db.Column(db.String(120))
     body = db.Column(db.String(2000))
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    pub_date = db.Column(db.DateTime)
 
-    def __init__(self, title, body, owner):
+    def __init__(self, title, body, owner, pub_date=None):
         self.title = title
         self.body = body
         self.owner = owner
+        if pub_date is None:
+            pub_date = datetime.utcnow()
+        self.pub_date = pub_date
 
 
 class User(db.Model):
@@ -43,16 +48,17 @@ def require_login():
 def blog():
     # find out who the user is
     owner = User.query.filter_by(username=session['username']).first()
-    username = session['username']
     # are they trying to view an individual post?
     entry_id = request.args.get('id')
+    username = session['username']
+
     if entry_id:
         blog = Blog.query.get(entry_id)
-        return render_template('individual_entry.html', blog = blog)
+        return render_template('individual_entry.html', blog = blog, username=username)
     # if not, show them all the posts by the user.
     else:
         blog_entries = Blog.query.filter_by(owner=owner).order_by(Blog.id.desc()).all()
-        return render_template('blog.html', title = "Blogz", blog_entries = blog_entries, username=username)
+        return render_template('blog.html', title = "My Blogz", blog_entries = blog_entries, username=username)
 
 
 @app.route('/delete', methods=['POST'])
@@ -65,8 +71,9 @@ def delete():
 
 @app.route('/')
 def index():
-    '''convenience route'''
-    return redirect('/blog')
+    username = session['username']
+    authors = User.query.order_by(User.id.desc()).all()
+    return render_template('index.html', authors=authors, title="All Authors", username=username)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -95,6 +102,7 @@ def logout():
 
 @app.route('/newpost', methods=['GET', 'POST'])
 def newpost():
+    username = session['username']
     owner = User.query.filter_by(username=session['username']).first()
 
     if request.method == 'POST':
@@ -113,7 +121,7 @@ def newpost():
             new_blog_id = new_blog.id
             return redirect('/?={}'.format(new_blog_id))
     
-    return render_template('new_post.html', title = "New Blog Entry")
+    return render_template('new_post.html', title = "New Blog Entry", username=username)
 
 
 @app.route('/signup', methods=['GET', 'POST'])

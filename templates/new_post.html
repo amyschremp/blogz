@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h1 class='label'>New Blog Post</h1>
-
 {% with messages = get_flashed_messages() %}
     <ul class='flashes'>
     {% for message in messages %} 
