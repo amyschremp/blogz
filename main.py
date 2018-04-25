@@ -41,14 +41,18 @@ def require_login():
 
 @app.route('/blog')
 def blog():
+    # find out who the user is
     owner = User.query.filter_by(username=session['username']).first()
+    username = session['username']
+    # are they trying to view an individual post?
     entry_id = request.args.get('id')
     if entry_id:
         blog = Blog.query.get(entry_id)
         return render_template('individual_entry.html', blog = blog)
+    # if not, show them all the posts by the user.
     else:
-        blog_entries = Blog.query.order_by(Blog.id.desc()).all()
-        return render_template('blog.html', title = "Blogz", blog_entries = blog_entries)
+        blog_entries = Blog.query.filter_by(owner=owner).order_by(Blog.id.desc()).all()
+        return render_template('blog.html', title = "Blogz", blog_entries = blog_entries, username=username)
 
 
 @app.route('/delete', methods=['POST'])
@@ -70,14 +74,16 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        user = User.query.filter_by(username=username).first()
+        existing_user = User.query.filter_by(username=username).first()
         if not username or not password:
             flash('Please enter a username and password.')
-        elif user and user.password == password:
+        elif not existing_user:
+            flash('Username does not exist.')
+        elif not password == existing_user.password:
+            flash('Password is incorrect.')
+        elif existing_user and existing_user.password == password:
             session['username'] = username
-            return redirect('/')
-        else:
-            flash('User password incorrect, or user does not exist')
+            return redirect('/newpost')
     return render_template('login.html', title='Login')
 
 
@@ -105,7 +111,7 @@ def newpost():
             db.session.add(new_blog)
             db.session.commit()
             new_blog_id = new_blog.id
-            return redirect('/')
+            return redirect('/?={}'.format(new_blog_id))
     
     return render_template('new_post.html', title = "New Blog Entry")
 
@@ -118,14 +124,18 @@ def signup():
         verify = request.form['verify_password']
         existing_user = User.query.filter_by(username=username).first()
         if not existing_user:
-            if not username or not password or not verify:
-                flash('Please enter a username and password.')
+            if not username:
+                flash('Please enter a username.')
+            elif not password:
+                flash('Please enter a password.')
+            elif not verify:
+                flash('Please verify your password.')
             elif not password == verify:
                 flash('Passwords do not match.')
-            elif len(username) > 30:
-                flash('Please enter a username of 30 characters or less.')
-            elif len(password) > 30:
-                flash('Please enter a password of 30 characters or less.')
+            elif len(username) > 30 or len(username) < 3:
+                flash('Please enter a username between 3 and 30 characters.')
+            elif len(password) > 30 or len(password) < 3:
+                flash('Please enter a password between 3 and 30 characters.')
             else:
                 new_user = User(username, password)
                 db.session.add(new_user)
@@ -133,6 +143,8 @@ def signup():
                 session['username'] = username
                 flash('Logged in')
                 return redirect('/blog')
+        else:
+            flash("Username is not available.")
     return render_template('signup.html', title = "Sign Up for Blogz")
 
 

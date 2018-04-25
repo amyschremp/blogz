@@ -24,5 +24,8 @@
     </form>
 </div>
 {% endfor %}
+{% if not blog_entries %}
+    <p style='text-align:center;'>{{ username }} has no posts yet! Click <a href='/newpost'>here</a> to add one.</p>
+{% endif %}
 
 {% endblock %}
