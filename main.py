@@ -34,13 +34,14 @@ class User(db.Model):
 
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'signup']
+    allowed_routes = ['login', 'signup', 'static']
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
 
 
 @app.route('/blog')
 def blog():
+    owner = User.query.filter_by(username=session['username']).first()
     entry_id = request.args.get('id')
     if entry_id:
         blog = Blog.query.get(entry_id)

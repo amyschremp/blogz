@@ -2,16 +2,17 @@
 <html>
     <head>
         <title>{{title}}</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-        <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" />
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
     </head>
     <body>
         <div class='nav'>
             <a href='/'>Home</a>
             <a href='/newpost'>New Blog Entry</a>
             {% if 'username' not in session %}
-                <a href='/signup'>Sign Up</a>
-                <a href='/login'>Login</a>
+            <a href='/signup'>Sign Up</a>
+            <a href='/login'>Login</a>
             {% endif %}
             {% if 'username' in session %}
                 <a class='right' href='/logout'>Logout</a>
