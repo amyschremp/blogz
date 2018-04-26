@@ -4,9 +4,9 @@
 {% for blog in blog_entries %}
 <div class='blog'>
     <span style='float: right;'>Posted by <a href='/blog?user={{user.id}}'>{{ user.username }}</a> on {{blog.pub_date}}</span>
-    <h3><a href='/blog?user={{user.id}}'>{{blog.title}}</a></h3>
+    <h3><a href='/blog?id={{blog.id}}'>{{blog.title}}</a></h3>
     <p>{{blog.body}}</p>
-    {% if user == current_user %}
+    {% if user.username == current_user %}
     <form action='/delete' method='post'>
         <input type='hidden' name='id' value='{{blog.id}}' />
         <input type='submit' value='Delete Entry' />
@@ -16,7 +16,7 @@
 {% endfor %}
 
 {% if not blog_entries %}
-    <p style='text-align:center;'>{{ user }} has no posts yet!</p>
+    <p style='text-align:center;'>{{ user.username }} has no posts yet!</p>
 {% endif %}
 
 {% endblock %}

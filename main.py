@@ -52,17 +52,16 @@ def blog():
    
     # are they trying to view an individual post?
     if entry_id:
-        # blog object
-        blog = Blog.query.get(entry_id)
-        # stuck here trying to pull user id out of blog somehow to use it as a whole object,
-        # for manipulation in the template.
-        return render_template('individual_entry.html', blog=blog, user=user)
+        blog = Blog.query.filter_by(id = entry_id).first()
+        user_id = blog.owner_id
+        user = User.query.get(user_id)
+        return render_template('individual_entry.html', blog=blog, user=user.username, current_user=current_user)
     # are they trying to view a specific user's page?
     elif user_id:
         user = User.query.filter_by(id = user_id).first()
         blog_entries = Blog.query.filter_by(owner=user).order_by(Blog.id.desc()).all()
         return render_template('user.html', title = "{0}'s Blogz".format(user.username), blog_entries=blog_entries, user=user, current_user=current_user)
-    # if not, show them all the posts by the user.
+    # if not, show them all the posts by the current_user.
     else:
         owner = User.query.filter_by(username=session['username']).first()
         blog_entries = Blog.query.filter_by(owner=owner).order_by(Blog.id.desc()).all()
