@@ -17,10 +17,10 @@ class Blog(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     pub_date = db.Column(db.DateTime)
 
-    def __init__(self, title, body, owner, pub_date=None):
+    def __init__(self, title, body, owner_id, pub_date=None):
         self.title = title
         self.body = body
-        self.owner = owner
+        self.owner = owner_id
         if pub_date is None:
             pub_date = datetime.utcnow()
         self.pub_date = pub_date
@@ -46,19 +46,27 @@ def require_login():
 
 @app.route('/blog')
 def blog():
-    # find out who the user is
-    owner = User.query.filter_by(username=session['username']).first()
-    # are they trying to view an individual post?
     entry_id = request.args.get('id')
-    username = session['username']
-
+    user_id = request.args.get('user')
+    current_user = session['username']
+   
+    # are they trying to view an individual post?
     if entry_id:
+        # blog object
         blog = Blog.query.get(entry_id)
-        return render_template('individual_entry.html', blog = blog, username=username)
+        # stuck here trying to pull user id out of blog somehow to use it as a whole object,
+        # for manipulation in the template.
+        return render_template('individual_entry.html', blog=blog, user=user)
+    # are they trying to view a specific user's page?
+    elif user_id:
+        user = User.query.filter_by(id = user_id).first()
+        blog_entries = Blog.query.filter_by(owner=user).order_by(Blog.id.desc()).all()
+        return render_template('user.html', title = "{0}'s Blogz".format(user.username), blog_entries=blog_entries, user=user, current_user=current_user)
     # if not, show them all the posts by the user.
     else:
+        owner = User.query.filter_by(username=session['username']).first()
         blog_entries = Blog.query.filter_by(owner=owner).order_by(Blog.id.desc()).all()
-        return render_template('blog.html', title = "My Blogz", blog_entries = blog_entries, username=username)
+        return render_template('blog.html', title = "My Blogz", blog_entries=blog_entries, user= owner.username)
 
 
 @app.route('/delete', methods=['POST'])
@@ -71,9 +79,8 @@ def delete():
 
 @app.route('/')
 def index():
-    username = session['username']
     authors = User.query.order_by(User.id.desc()).all()
-    return render_template('index.html', authors=authors, title="All Authors", username=username)
+    return render_template('index.html', authors=authors, title="All Authors")
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -102,7 +109,6 @@ def logout():
 
 @app.route('/newpost', methods=['GET', 'POST'])
 def newpost():
-    username = session['username']
     owner = User.query.filter_by(username=session['username']).first()
 
     if request.method == 'POST':
@@ -119,9 +125,9 @@ def newpost():
             db.session.add(new_blog)
             db.session.commit()
             new_blog_id = new_blog.id
-            return redirect('/?={}'.format(new_blog_id))
+            return redirect('/blog?={}'.format(new_blog_id))
     
-    return render_template('new_post.html', title = "New Blog Entry", username=username)
+    return render_template('new_post.html', title = "New Blog Entry")
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -149,7 +155,6 @@ def signup():
                 db.session.add(new_user)
                 db.session.commit()
                 session['username'] = username
-                flash('Logged in')
                 return redirect('/blog')
         else:
             flash("Username is not available.")

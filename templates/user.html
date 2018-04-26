@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% for blog in blog_entries %}
+<div class='blog'>
+    <span style='float: right;'>Posted by <a href='/blog?user={{user.id}}'>{{ user.username }}</a> on {{blog.pub_date}}</span>
+    <h3><a href='/blog?user={{user.id}}'>{{blog.title}}</a></h3>
+    <p>{{blog.body}}</p>
+    {% if user == current_user %}
+    <form action='/delete' method='post'>
+        <input type='hidden' name='id' value='{{blog.id}}' />
+        <input type='submit' value='Delete Entry' />
+    </form>
+    {% endif %}
+</div>
+{% endfor %}
+
+{% if not blog_entries %}
+    <p style='text-align:center;'>{{ user }} has no posts yet!</p>
+{% endif %}
+
+{% endblock %}

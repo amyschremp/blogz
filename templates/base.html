@@ -16,7 +16,7 @@
             {% endif %}
             {% if 'username' in session %}
                 <a href='/blog'>My Blogz</a>
-                <a style='float:right;'>Logged in as {{username}}</a>
+                <a style='float:right;'>Logged in as {{session['username']}}</a>
                 <a style='float:right;' href='/logout'>Logout</a>
             {% endif %}
         </div>
