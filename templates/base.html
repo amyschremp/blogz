@@ -9,13 +9,16 @@
     <body>
         <div class='nav'>
             <a href='/'>Home</a>
+            <a href='/blog'>All Blogz</a>
             <a href='/newpost'>New Blog Entry</a>
             {% if 'username' not in session %}
             <a href='/signup'>Sign Up</a>
             <a href='/login'>Login</a>
             {% endif %}
             {% if 'username' in session %}
-                <a href='/blog'>My Blogz</a>
+                {% set current_username = session['username'] %}
+                {% set current_user = User.query.filter_by(username=current_username).first() %}
+                <a href='/blog?user={{ current_user.id }}'>My Blogz</a>
                 <a style='float:right;'>Logged in as {{session['username']}}</a>
                 <a style='float:right;' href='/logout'>Logout</a>
             {% endif %}

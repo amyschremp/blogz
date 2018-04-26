@@ -3,14 +3,16 @@
 
 <br />
 <div class='blog'>
-    <span style='float: right;'>Posted by <a href='/blog?id={{blog.id}}'>{{ user.username }}</a> on {{blog.pub_date}}</span>
+    <span style='float: right;'>Posted by <a href='/blog?user={{user.id}}'>{{ user.username }}</a> on {{blog.pub_date}}</span>
     <h2>{{blog.title}}</h2>
     <p>{{blog.body}}</p>
-    {% if user == current_user %}
-    <form action='/delete' method='post'>
-        <input type='hidden' name='id' value='{{blog.id}}' />
-        <input type='submit' value='Delete Entry' />
-    </form>
+    {% if session %}
+        {% if user == session['username'] %}
+        <form action='/delete' method='post'>
+            <input type='hidden' name='id' value='{{blog.id}}' />
+            <input type='submit' value='Delete Entry' />
+        </form>
+        {% endif %}
     {% endif %}
 </div>
 

@@ -39,7 +39,7 @@ class User(db.Model):
 
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'signup', 'static']
+    allowed_routes = ['blog', 'index', 'login', 'signup', 'static']
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
 
@@ -48,24 +48,24 @@ def require_login():
 def blog():
     entry_id = request.args.get('id')
     user_id = request.args.get('user')
-    current_user = session['username']
+    if session:
+        current_user = session['username']
    
     # are they trying to view an individual post?
     if entry_id:
         blog = Blog.query.filter_by(id = entry_id).first()
         user_id = blog.owner_id
         user = User.query.get(user_id)
-        return render_template('individual_entry.html', blog=blog, user=user.username, current_user=current_user)
+        return render_template('individual_entry.html', blog=blog, user=user, User=User)
     # are they trying to view a specific user's page?
     elif user_id:
         user = User.query.filter_by(id = user_id).first()
         blog_entries = Blog.query.filter_by(owner=user).order_by(Blog.id.desc()).all()
-        return render_template('user.html', title = "{0}'s Blogz".format(user.username), blog_entries=blog_entries, user=user, current_user=current_user)
+        return render_template('user.html', title = "{0}'s Blogz".format(user.username), blog_entries=blog_entries, user=user, User=User)
     # if not, show them all the posts by the current_user.
     else:
-        owner = User.query.filter_by(username=session['username']).first()
-        blog_entries = Blog.query.filter_by(owner=owner).order_by(Blog.id.desc()).all()
-        return render_template('blog.html', title = "My Blogz", blog_entries=blog_entries, user= owner.username)
+        blog_entries = Blog.query.order_by(Blog.id.desc()).all()
+        return render_template('blog.html', title = "All Blogz", blog_entries=blog_entries, User = User)
 
 
 @app.route('/delete', methods=['POST'])
@@ -73,13 +73,13 @@ def delete():
     to_be_deleted = request.form['id']
     Blog.query.filter_by(id=to_be_deleted).delete()
     db.session.commit()
-    return redirect('/')
+    return redirect('/blog')
 
 
 @app.route('/')
 def index():
     authors = User.query.order_by(User.id.desc()).all()
-    return render_template('index.html', authors=authors, title="All Authors")
+    return render_template('index.html', authors=authors, title="All Authors", User=User)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -97,13 +97,13 @@ def login():
         elif existing_user and existing_user.password == password:
             session['username'] = username
             return redirect('/newpost')
-    return render_template('login.html', title='Login')
+    return render_template('login.html', title='Login', User=User)
 
 
 @app.route('/logout')
 def logout():
     del session['username']
-    return redirect('/')
+    return redirect('/blog')
 
 
 @app.route('/newpost', methods=['GET', 'POST'])
@@ -124,9 +124,9 @@ def newpost():
             db.session.add(new_blog)
             db.session.commit()
             new_blog_id = new_blog.id
-            return redirect('/blog?={}'.format(new_blog_id))
+            return redirect('/blog?id={}'.format(new_blog_id))
     
-    return render_template('new_post.html', title = "New Blog Entry")
+    return render_template('new_post.html', title = "New Blog Entry", User=User)
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -154,10 +154,10 @@ def signup():
                 db.session.add(new_user)
                 db.session.commit()
                 session['username'] = username
-                return redirect('/blog')
+                return redirect('/newpost')
         else:
-            flash("Username is not available.")
-    return render_template('signup.html', title = "Sign Up for Blogz")
+            flash("Username already exists.")
+    return render_template('signup.html', title = "Sign Up for Blogz", User=User)
 
 
 if __name__ == "__main__":
